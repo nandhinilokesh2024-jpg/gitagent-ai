@@ -1,0 +1,5 @@
+2026-08-18 11:00:00 INFO Application started
+2026-08-18 11:00:05 INFO Email notification requested
+2026-08-18 11:00:06 ERROR Email service failed
+2026-08-18 11:00:06 ERROR Unable to send notification email
+2026-08-18 11:00:06 ERROR Email notification request failed

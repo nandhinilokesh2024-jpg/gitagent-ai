@@ -1,0 +1,68 @@
+[
+    {
+        "issue_number": 8,
+        "title": "Email service failure",
+        "description": "### Severity\nHigh\n\n### Problem Summary\nThe email notification service failed when attempting to send an email notification, resulting in unhandled email sending errors.\n\n### Impact\nUsers will not receive automated email notifications, transactional messages, or system alerts, causing communication breakdowns and potential operational disruptions.\n\n### Possible Root Cause\n- Invalid or expired SMTP credentials / API key configuration.\n- Outbound network connectivity issues or firewall blocking SMTP/HTTP ports to the email provider.\n- Service outage or rate limiting imposed by the email service provider.\n\n### Error Log\n```\n2026-08-18 11:00:05 INFO Email notification requested\n2026-08-18 11:00:06 ERROR Email service failed\n2026-08-18 11:00:06 ERROR Unable to send notification email\n2026-08-18 11:00:06 ERROR Email notification request failed\n```\n\n### Recommended Action\n1. Verify email service / SMTP server credentials and environment configuration.\n2. Check network logs and outgoing firewall rules for connections to the email provider.\n3. Review email service provider status and error logs for rate limits or outage indicators.\n4. Test email dispatch manually and implement retry logic for transient failures.",
+        "state": "open",
+        "labels": [
+            "severity:high"
+        ],
+        "url": "https://github.com/nandhinilokesh2024-jpg/gitagent-ai/issues/8"
+    },
+    {
+        "issue_number": 7,
+        "title": "File upload service failure",
+        "description": "The application error logs report a failure in the file upload service:\n\n**Log details:**\n- `2026-08-18 10:00:06 ERROR File upload service failed`\n- `2026-08-18 10:00:06 ERROR Unable to upload file to storage service`\n- `2026-08-18 10:00:06 ERROR File upload request failed`\n\nPlease investigate the file upload service and storage connectivity to resolve the issue.",
+        "state": "open",
+        "labels": [],
+        "url": "https://github.com/nandhinilokesh2024-jpg/gitagent-ai/issues/7"
+    },
+    {
+        "issue_number": 6,
+        "title": "Payment Processing Failure",
+        "description": "Users are encountering errors during the checkout/payment process, causing transactions to fail. Please investigate the payment gateway integration and resolve the issue.",
+        "state": "open",
+        "labels": [],
+        "url": "https://github.com/nandhinilokesh2024-jpg/gitagent-ai/issues/6"
+    },
+    {
+        "issue_number": 5,
+        "title": "Database connection failure causing user login failures",
+        "description": "The application error logs report a database connection failure:\n- 2026-08-17 14:30:16 ERROR Database connection failed\n- 2026-08-17 14:30:16 ERROR Unable to connect to database server\n- 2026-08-17 14:30:16 ERROR Login request failed\n\nThis issue causes user login attempts to fail due to the inability to connect to the database server.",
+        "state": "open",
+        "labels": [],
+        "url": "https://github.com/nandhinilokesh2024-jpg/gitagent-ai/issues/5"
+    },
+    {
+        "issue_number": 4,
+        "title": "Database connection failure",
+        "description": "The application is unable to establish a connection to the database. Please check the connection settings, credentials, network configuration, and database server status.",
+        "state": "open",
+        "labels": [],
+        "url": "https://github.com/nandhinilokesh2024-jpg/gitagent-ai/issues/4"
+    },
+    {
+        "issue_number": 3,
+        "title": "Login button is not working",
+        "description": "**Describe the bug**\nClicking the login button on the authentication page does not trigger any action. The user remains on the login page and no error message or network request appears to be initiated.\n\n**Steps to Reproduce**\n1. Navigate to the login page.\n2. Enter valid user credentials.\n3. Click on the \"Login\" button.\n\n**Expected Behavior**\nThe user should be authenticated and redirected to the dashboard, or an appropriate error message should be displayed if authentication fails.\n\n**Actual Behavior**\nNothing happens when clicking the login button.\n\n**Environment / Context**\n- Browser: All major browsers (Chrome, Firefox, Safari, Edge)\n- Device: Desktop / Mobile",
+        "state": "open",
+        "labels": [],
+        "url": "https://github.com/nandhinilokesh2024-jpg/gitagent-ai/issues/3"
+    },
+    {
+        "issue_number": 2,
+        "title": "Login Bug",
+        "description": "The login button is not working.",
+        "state": "open",
+        "labels": [],
+        "url": "https://github.com/nandhinilokesh2024-jpg/gitagent-ai/issues/2"
+    },
+    {
+        "issue_number": 1,
+        "title": "Test Issue",
+        "description": "Testing GitAgent AI GitHub API connection.\n",
+        "state": "open",
+        "labels": [],
+        "url": "https://github.com/nandhinilokesh2024-jpg/gitagent-ai/issues/1"
+    }
+]
