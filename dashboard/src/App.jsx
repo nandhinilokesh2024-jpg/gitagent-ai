@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import "./App.css";
+
+const API_URL = "http://127.0.0.1:8000";
 
 function App() {
   const [status, setStatus] = useState("Checking...");
   const [issues, setIssues] = useState([]);
-
   const [repositories, setRepositories] = useState([]);
   const [selectedRepository, setSelectedRepository] =
     useState("gitagent-ai");
@@ -12,14 +14,8 @@ function App() {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // --------------------------------
-  // Load backend status, repositories
-  // and GitHub issues
-  // --------------------------------
-
   useEffect(() => {
-    // Backend health
-    fetch("http://127.0.0.1:8000/health")
+    fetch(`${API_URL}/health`)
       .then((response) => response.json())
       .then((data) => {
         setStatus(data.status);
@@ -28,8 +24,7 @@ function App() {
         setStatus("Backend connection failed");
       });
 
-    // Load repositories
-    fetch("http://127.0.0.1:8000/repositories")
+    fetch(`${API_URL}/repositories`)
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
@@ -44,8 +39,7 @@ function App() {
         setRepositories([]);
       });
 
-    // Load GitHub issues
-    fetch("http://127.0.0.1:8000/issues")
+    fetch(`${API_URL}/issues`)
       .then((response) => response.json())
       .then((data) => {
         setIssues(data);
@@ -54,10 +48,6 @@ function App() {
         setIssues([]);
       });
   }, []);
-
-  // --------------------------------
-  // Analyze Application Error
-  // --------------------------------
 
   const analyzeError = async () => {
     if (!errorText.trim()) {
@@ -68,33 +58,29 @@ function App() {
     setAnalysis(null);
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/analyze",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            error: errorText,
-            repository: selectedRepository,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/analyze`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          error: errorText,
+          repository: selectedRepository,
+        }),
+      });
 
       const data = await response.json();
 
       setAnalysis(data);
 
-      // Refresh GitHub issues after a new issue is created
       if (data.action === "new_issue_created") {
-        fetch("http://127.0.0.1:8000/issues")
+        fetch(`${API_URL}/issues`)
           .then((response) => response.json())
           .then((issueData) => {
             setIssues(issueData);
           });
       }
-    } catch (error) {
+    } catch {
       setAnalysis({
         success: false,
         error: "Unable to connect to backend.",
@@ -104,433 +90,493 @@ function App() {
     setLoading(false);
   };
 
-  // --------------------------------
-  // Related Issues
-  // --------------------------------
-
   const relatedIssues =
     analysis?.similar_issues?.filter(
       (issue) => issue.is_related
     ) || [];
 
+  const openIssues = issues.filter(
+    (issue) => issue.state === "open"
+  ).length;
+
+  const closedIssues = issues.filter(
+    (issue) => issue.state === "closed"
+  ).length;
+
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#f4f7fb",
-        padding: "30px",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      {/* Header */}
+    <div className="app-layout">
 
-      <div
-        style={{
-          backgroundColor: "#111827",
-          color: "white",
-          padding: "25px",
-          borderRadius: "12px",
-          marginBottom: "25px",
-        }}
-      >
-        <h1 style={{ margin: 0 }}>GitAgent AI</h1>
+      {/* Sidebar */}
 
-        <p style={{ marginBottom: 0 }}>
-          AI-powered GitHub Issue Management
-        </p>
-      </div>
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="brand-logo">G</div>
 
-      {/* Statistics */}
-
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          flexWrap: "wrap",
-          marginBottom: "30px",
-        }}
-      >
-        {/* Backend Status */}
-
-        <div
-          style={{
-            backgroundColor: "white",
-            padding: "20px",
-            borderRadius: "10px",
-            minWidth: "180px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-          }}
-        >
-          <h3>Backend Status</h3>
-
-          <p
-            style={{
-              color: status === "healthy" ? "green" : "red",
-              fontWeight: "bold",
-            }}
-          >
-            ● {status}
-          </p>
-        </div>
-
-        {/* Total Issues */}
-
-        <div
-          style={{
-            backgroundColor: "white",
-            padding: "20px",
-            borderRadius: "10px",
-            minWidth: "180px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-          }}
-        >
-          <h3>Total Issues</h3>
-
-          <p
-            style={{
-              fontSize: "28px",
-              fontWeight: "bold",
-              margin: 0,
-            }}
-          >
-            {issues.length}
-          </p>
-        </div>
-
-        {/* Repository */}
-
-        <div
-          style={{
-            backgroundColor: "white",
-            padding: "20px",
-            borderRadius: "10px",
-            minWidth: "220px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-          }}
-        >
-          <h3>Repository</h3>
-
-          <select
-            value={selectedRepository}
-            onChange={(e) =>
-              setSelectedRepository(e.target.value)
-            }
-            style={{
-              padding: "10px",
-              borderRadius: "8px",
-              border: "1px solid #d1d5db",
-              fontSize: "15px",
-              width: "100%",
-            }}
-          >
-            {repositories.length > 0 ? (
-              repositories.map((repository) => (
-                <option
-                  key={repository}
-                  value={repository}
-                >
-                  {repository}
-                </option>
-              ))
-            ) : (
-              <option value="gitagent-ai">
-                gitagent-ai
-              </option>
-            )}
-          </select>
-        </div>
-      </div>
-
-      {/* Analyze Error */}
-
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "25px",
-          borderRadius: "12px",
-          marginBottom: "30px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-        }}
-      >
-        <h2>Analyze Application Error</h2>
-
-        <p style={{ color: "#6b7280" }}>
-          Enter an application error and let GitAgent AI
-          analyze it using severity detection and RAG.
-        </p>
-
-        <textarea
-          value={errorText}
-          onChange={(e) => setErrorText(e.target.value)}
-          placeholder="Example: Email service failed to send notification"
-          rows="5"
-          style={{
-            width: "100%",
-            padding: "12px",
-            borderRadius: "8px",
-            border: "1px solid #d1d5db",
-            fontSize: "16px",
-            boxSizing: "border-box",
-            resize: "vertical",
-          }}
-        />
-
-        <button
-          onClick={analyzeError}
-          disabled={loading}
-          style={{
-            marginTop: "15px",
-            padding: "12px 22px",
-            backgroundColor: loading
-              ? "#9ca3af"
-              : "#2563eb",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            fontSize: "16px",
-            fontWeight: "bold",
-            cursor: loading
-              ? "not-allowed"
-              : "pointer",
-          }}
-        >
-          {loading ? "Analyzing..." : "Analyze Error"}
-        </button>
-      </div>
-
-      {/* Analysis Result */}
-
-      {analysis && analysis.success && (
-        <div
-          style={{
-            backgroundColor: "white",
-            padding: "25px",
-            borderRadius: "12px",
-            marginBottom: "30px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-          }}
-        >
-          <h2>Analysis Result</h2>
-
-          {/* Selected Repository */}
-
-          <p style={{ color: "#6b7280" }}>
-            Repository:{" "}
-            <strong>{selectedRepository}</strong>
-          </p>
-
-          {/* Severity */}
-
-          <div
-            style={{
-              display: "inline-block",
-              padding: "8px 14px",
-              borderRadius: "20px",
-              backgroundColor:
-                analysis.severity === "CRITICAL"
-                  ? "#fee2e2"
-                  : analysis.severity === "HIGH"
-                  ? "#ffedd5"
-                  : analysis.severity === "MEDIUM"
-                  ? "#fef3c7"
-                  : "#dcfce7",
-              fontWeight: "bold",
-              marginBottom: "20px",
-            }}
-          >
-            Severity: {analysis.severity}
+          <div className="brand-text">
+            <h1>GitAgent AI</h1>
+            <p>Issue Intelligence</p>
           </div>
+        </div>
 
-          {/* Existing Issue Found */}
+        <nav className="sidebar-nav">
+          <div
+  className="nav-link active"
+  onClick={() =>
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    })
+  }
+>
+  <span>◈</span>
+  <span>Dashboard</span>
+</div>
 
-          {analysis.action === "existing_issue_found" && (
-            <>
-              <h3>Similar GitHub Issues</h3>
+<div
+  className="nav-link"
+  onClick={() =>
+    document
+      .getElementById("issues-section")
+      ?.scrollIntoView({
+        behavior: "smooth",
+      })
+  }
+>
+  <span>◉</span>
+  <span>Issues</span>
+</div>
 
-              {relatedIssues.length > 0 ? (
-                relatedIssues.map((issue) => (
-                  <div
-                    key={issue.issue_number}
-                    style={{
-                      border: "1px solid #e5e7eb",
-                      borderRadius: "10px",
-                      padding: "18px",
-                      marginTop: "12px",
-                    }}
-                  >
-                    <h3>
-                      #{issue.issue_number} — {issue.title}
-                    </h3>
+<div
+  className="nav-link"
+  onClick={() =>
+    document
+      .getElementById("ai-analysis")
+      ?.scrollIntoView({
+        behavior: "smooth",
+      })
+  }
+>
+  <span>✦</span>
+  <span>AI Analysis</span>
+</div>
+        </nav>
 
-                    <p>
-                      Similarity:{" "}
-                      <strong>
-                        {(issue.score * 100).toFixed(1)}%
-                      </strong>
-                    </p>
+        <div className="sidebar-bottom">
+          <div className="connection-card">
+            <span className="connection-dot"></span>
 
-                    <p>
-                      This issue appears related to the
-                      entered application error.
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p>
-                  An existing issue was found, but no
-                  related issue passed the similarity
-                  threshold.
-                </p>
-              )}
-            </>
-          )}
-
-          {/* New Issue Created */}
-
-          {analysis.action === "new_issue_created" && (
-            <div
-              style={{
-                marginTop: "10px",
-                padding: "20px",
-                borderRadius: "10px",
-                backgroundColor: "#eff6ff",
-                border: "1px solid #bfdbfe",
-              }}
-            >
-              <h3>New GitHub Issue Created</h3>
-
-              <p>
-                No sufficiently similar existing issue was
-                found.
-              </p>
-
-              {analysis.created_issue?.success && (
-                <>
-                  <p>
-                    Issue{" "}
-                    <strong>
-                      #{analysis.created_issue.issue_number}
-                    </strong>{" "}
-                    was created automatically.
-                  </p>
-
-                  <a
-                    href={analysis.created_issue.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      color: "#2563eb",
-                      fontWeight: "bold",
-                      textDecoration: "none",
-                    }}
-                  >
-                    View New GitHub Issue →
-                  </a>
-                </>
-              )}
+            <div>
+              <strong>System Online</strong>
+              <small>Services are ready</small>
             </div>
-          )}
-
-          {/* Fallback */}
-
-          {analysis.action !== "existing_issue_found" &&
-            analysis.action !== "new_issue_created" &&
-            relatedIssues.length === 0 && (
-              <p>
-                No related GitHub issue was found.
-              </p>
-            )}
-        </div>
-      )}
-
-      {/* Analysis Error */}
-
-      {analysis && !analysis.success && (
-        <div
-          style={{
-            backgroundColor: "#fee2e2",
-            border: "1px solid #fecaca",
-            padding: "20px",
-            borderRadius: "10px",
-            marginBottom: "30px",
-            color: "#991b1b",
-          }}
-        >
-          <strong>Analysis Failed</strong>
-
-          <p style={{ marginBottom: 0 }}>
-            {analysis.error}
-          </p>
-        </div>
-      )}
-
-      {/* GitHub Issues */}
-
-      <h2>GitHub Issues</h2>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: "20px",
-        }}
-      >
-        {issues.map((issue) => (
-          <div
-            key={issue.id}
-            style={{
-              backgroundColor: "white",
-              padding: "20px",
-              borderRadius: "10px",
-              boxShadow:
-                "0 2px 8px rgba(0,0,0,0.08)",
-            }}
-          >
-            <p
-              style={{
-                color: "#6b7280",
-                marginBottom: "8px",
-              }}
-            >
-              Issue #{issue.number}
-            </p>
-
-            <h3>{issue.title}</h3>
-
-            <p>
-              Status:{" "}
-              <strong
-                style={{
-                  color:
-                    issue.state === "open"
-                      ? "green"
-                      : "#6b7280",
-                }}
-              >
-                {issue.state}
-              </strong>
-            </p>
-
-            <p>
-              Comments: {issue.comments}
-            </p>
-
-            <a
-              href={issue.html_url}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                color: "#2563eb",
-                textDecoration: "none",
-                fontWeight: "bold",
-              }}
-            >
-              View on GitHub →
-            </a>
           </div>
-        ))}
-      </div>
+
+          <p>AI-powered developer workflow</p>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+
+      <main className="main-content">
+
+        {/* Header */}
+
+        <header className="page-header">
+          <div>
+            <span className="eyebrow">
+              DEVELOPER CONTROL CENTER
+            </span>
+
+            <h2>Dashboard</h2>
+
+            <p>
+              Analyze application errors and intelligently
+              manage GitHub issues.
+            </p>
+          </div>
+
+          <div className="backend-status">
+            <span
+              className={
+                status === "healthy"
+                  ? "status-dot online"
+                  : "status-dot offline"
+              }
+            ></span>
+
+            <span>
+              {status === "healthy"
+                ? "Backend Connected"
+                : status}
+            </span>
+          </div>
+        </header>
+
+        {/* Statistics */}
+
+        <section className="stats-grid">
+
+          <div className="stat-card">
+            <div className="stat-icon blue">◎</div>
+
+            <div>
+              <span>Total Issues</span>
+              <strong>{issues.length}</strong>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon green">✓</div>
+
+            <div>
+              <span>Open Issues</span>
+              <strong>{openIssues}</strong>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon gray">✓</div>
+
+            <div>
+              <span>Closed Issues</span>
+              <strong>{closedIssues}</strong>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon purple">◆</div>
+
+            <div>
+              <span>Repository</span>
+              <strong className="repository-name">
+                {selectedRepository}
+              </strong>
+            </div>
+          </div>
+
+        </section>
+
+        {/* Analysis Area */}
+
+        <section
+  id="ai-analysis"
+  className="analysis-grid"
+>
+
+          {/* Input */}
+
+          <div className="panel analysis-panel">
+
+            <div className="panel-header">
+              <div>
+                <span className="section-label">
+                  AI WORKSPACE
+                </span>
+
+                <h3>Analyze Application Error</h3>
+
+                <p>
+                  Enter an application error and GitAgent AI
+                  will analyze its severity and search for
+                  related GitHub issues.
+                </p>
+              </div>
+
+              <span className="ai-badge">
+                ✦ AI Powered
+              </span>
+            </div>
+
+            <div className="field">
+              <label>Repository</label>
+
+              <select
+                value={selectedRepository}
+                onChange={(e) =>
+                  setSelectedRepository(e.target.value)
+                }
+              >
+                {repositories.length > 0 ? (
+                  repositories.map((repository) => (
+                    <option
+                      key={repository}
+                      value={repository}
+                    >
+                      {repository}
+                    </option>
+                  ))
+                ) : (
+                  <option value="gitagent-ai">
+                    gitagent-ai
+                  </option>
+                )}
+              </select>
+            </div>
+
+            <div className="field">
+              <label>Application Error</label>
+
+              <textarea
+                value={errorText}
+                onChange={(e) =>
+                  setErrorText(e.target.value)
+                }
+                placeholder="Example: CRITICAL payment gateway timeout while processing order"
+                rows={7}
+              />
+            </div>
+
+            <div className="action-row">
+              <button
+                className="analyze-button"
+                onClick={analyzeError}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner"></span>
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    Analyze Error
+                    <span>→</span>
+                  </>
+                )}
+              </button>
+
+              <span className="action-note">
+                GitHub-connected analysis
+              </span>
+            </div>
+
+          </div>
+
+          {/* Result */}
+
+          <div className="panel result-panel">
+
+            <div className="panel-header result-header">
+              <div>
+                <span className="section-label">
+                  ANALYSIS
+                </span>
+
+                <h3>AI Result</h3>
+              </div>
+
+              <div className="result-icon">✦</div>
+            </div>
+
+            {!analysis && (
+              <div className="empty-result">
+
+                <div className="empty-icon">
+                  ✦
+                </div>
+
+                <h4>Waiting for analysis</h4>
+
+                <p>
+                  Enter an application error and click
+                  <strong> Analyze Error</strong> to see
+                  the result.
+                </p>
+
+              </div>
+            )}
+
+            {analysis?.success && (
+              <div className="result-content">
+
+                <div className="severity-row">
+                  <span>Detected Severity</span>
+
+                  <span
+                    className={`severity-badge ${analysis.severity.toLowerCase()}`}
+                  >
+                    {analysis.severity}
+                  </span>
+                </div>
+
+                <div className="divider"></div>
+
+                <div className="repository-row">
+                  <span>Repository</span>
+                  <strong>{selectedRepository}</strong>
+                </div>
+
+                {analysis.action ===
+                  "existing_issue_found" && (
+                  <div className="result-section">
+
+                    <h4>Related GitHub Issues</h4>
+
+                    {relatedIssues.length > 0 ? (
+                      relatedIssues.map((issue) => (
+                        <div
+                          className="match-card"
+                          key={issue.issue_number}
+                        >
+                          <div className="match-top">
+                            <strong>
+                              #{issue.issue_number}
+                            </strong>
+
+                            <span>
+                              {(issue.score * 100).toFixed(1)}%
+                            </span>
+                          </div>
+
+                          <p>{issue.title}</p>
+
+                          <small>
+                            Semantic similarity match
+                          </small>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="muted">
+                        No related issue passed the
+                        similarity threshold.
+                      </p>
+                    )}
+
+                  </div>
+                )}
+
+                {analysis.action ===
+                  "new_issue_created" && (
+                  <div className="created-card">
+
+                    <div className="created-icon">
+                      ✓
+                    </div>
+
+                    <div>
+                      <h4>New GitHub Issue Created</h4>
+
+                      <p>
+                        No sufficiently similar existing
+                        issue was found.
+                      </p>
+
+                      {analysis.created_issue?.success && (
+                        <a
+                          href={
+                            analysis.created_issue.url
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          View Issue #
+                          {
+                            analysis.created_issue
+                              .issue_number
+                          }{" "}
+                          on GitHub →
+                        </a>
+                      )}
+                    </div>
+
+                  </div>
+                )}
+
+              </div>
+            )}
+
+            {analysis && !analysis.success && (
+              <div className="error-card">
+                <strong>Analysis Failed</strong>
+                <p>{analysis.error}</p>
+              </div>
+            )}
+
+          </div>
+
+        </section>
+
+        {/* GitHub Issues */}
+
+        <section
+  id="issues-section"
+  className="issues-section"
+>
+
+          <div className="issues-header">
+
+            <div>
+              <span className="section-label">
+                GITHUB INTEGRATION
+              </span>
+
+              <h3>Repository Issues</h3>
+
+              <p>
+                Live issues from{" "}
+                <strong>{selectedRepository}</strong>
+              </p>
+            </div>
+
+            <span className="issue-count">
+              {issues.length} issues
+            </span>
+
+          </div>
+
+          <div className="issues-grid">
+
+            {issues.map((issue) => (
+              <article
+                className="github-card"
+                key={issue.id}
+              >
+
+                <div className="github-card-top">
+
+                  <span className="issue-number">
+                    #{issue.number}
+                  </span>
+
+                  <span
+                    className={`state-badge ${issue.state}`}
+                  >
+                    {issue.state}
+                  </span>
+
+                </div>
+
+                <h4>{issue.title}</h4>
+
+                <div className="issue-meta">
+                  💬 {issue.comments} comments
+                </div>
+
+                <a
+                  href={issue.html_url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open on GitHub →
+                </a>
+
+              </article>
+            ))}
+
+          </div>
+
+        </section>
+
+        {/* Footer */}
+
+        <footer className="footer">
+          <span>GitAgent AI</span>
+          <span>
+            AI-powered GitHub Issue Management
+          </span>
+        </footer>
+
+      </main>
     </div>
   );
 }
