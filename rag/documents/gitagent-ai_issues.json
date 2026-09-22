@@ -1,5 +1,29 @@
 [
     {
+        "issue_number": 12,
+        "title": "Application Error: Application Error: Redis cache connection refused during user profile loading",
+        "description": "## Severity\n\nHIGH\n\n## Problem Summary\n\nApplication Error: Redis cache connection refused during user profile loading\n\n## Detection\n\nGitAgent AI analyzed this application error and did not find a sufficiently similar existing GitHub issue.\n\n## Recommended Action\n\nInvestigate the application logs and identify the root cause of this error.\n",
+        "state": "open",
+        "labels": [],
+        "url": "https://github.com/nandhinilokesh2024-jpg/gitagent-ai/issues/12"
+    },
+    {
+        "issue_number": 11,
+        "title": "Application Error: Database cache corruption causing unexpected data loss",
+        "description": "## Severity\n\nLOW\n\n## Problem Summary\n\nDatabase cache corruption causing unexpected data loss\n\n## Detection\n\nGitAgent AI analyzed this application error and did not find a sufficiently similar existing GitHub issue.\n\n## Recommended Action\n\nInvestigate the application logs and identify the root cause of this error.\n",
+        "state": "open",
+        "labels": [],
+        "url": "https://github.com/nandhinilokesh2024-jpg/gitagent-ai/issues/11"
+    },
+    {
+        "issue_number": 10,
+        "title": "Application Error: CRITICAL payment gateway timeout while processing order",
+        "description": "## Severity\n\nCRITICAL\n\n## Problem Summary\n\nCRITICAL payment gateway timeout while processing order\n\n## Detection\n\nGitAgent AI analyzed this application error and did not find a sufficiently similar existing GitHub issue.\n\n## Recommended Action\n\nInvestigate the application logs and identify the root cause of this error.\n",
+        "state": "open",
+        "labels": [],
+        "url": "https://github.com/nandhinilokesh2024-jpg/gitagent-ai/issues/10"
+    },
+    {
         "issue_number": 8,
         "title": "Email service failure",
         "description": "### Severity\nHigh\n\n### Problem Summary\nThe email notification service failed when attempting to send an email notification, resulting in unhandled email sending errors.\n\n### Impact\nUsers will not receive automated email notifications, transactional messages, or system alerts, causing communication breakdowns and potential operational disruptions.\n\n### Possible Root Cause\n- Invalid or expired SMTP credentials / API key configuration.\n- Outbound network connectivity issues or firewall blocking SMTP/HTTP ports to the email provider.\n- Service outage or rate limiting imposed by the email service provider.\n\n### Error Log\n```\n2026-08-18 11:00:05 INFO Email notification requested\n2026-08-18 11:00:06 ERROR Email service failed\n2026-08-18 11:00:06 ERROR Unable to send notification email\n2026-08-18 11:00:06 ERROR Email notification request failed\n```\n\n### Recommended Action\n1. Verify email service / SMTP server credentials and environment configuration.\n2. Check network logs and outgoing firewall rules for connections to the email provider.\n3. Review email service provider status and error logs for rate limits or outage indicators.\n4. Test email dispatch manually and implement retry logic for transient failures.",
