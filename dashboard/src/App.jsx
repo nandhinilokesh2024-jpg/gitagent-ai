@@ -424,7 +424,7 @@ function App() {
                             </strong>
 
                             <span>
-                              {(issue.score * 100).toFixed(1)}%
+                                {(issue.similarity_score * 100).toFixed(1)}%
                             </span>
                           </div>
 
