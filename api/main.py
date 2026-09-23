@@ -1,6 +1,10 @@
 import os
 import sys
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(
         os.path.abspath(__file__)
@@ -58,9 +62,34 @@ def repositories():
 
 @app.get("/issues")
 def issues():
-    from gemini_agent import get_issues
+    import os
+    import requests
 
-    return get_issues()
+    github_token = os.getenv("GITHUB_TOKEN")
+    github_owner = os.getenv("GITHUB_OWNER")
+    github_repo = os.getenv("GITHUB_REPO")
+
+    url = f"https://api.github.com/repos/{github_owner}/{github_repo}/issues"
+
+    headers = {
+        "Authorization": f"Bearer {github_token}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    response = requests.get(
+        url,
+        headers=headers,
+        timeout=15
+    )
+
+    if response.status_code == 200:
+        return response.json()
+
+    return {
+        "success": False,
+        "status_code": response.status_code,
+        "error": response.text
+    }
 
 
 @app.post("/analyze")
